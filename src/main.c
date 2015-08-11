@@ -17,16 +17,18 @@ static GFont s_ampm_font;
 #define KEY_TIME_COLOR_B 5
 
 static void inbox_received_callback(DictionaryIterator *iter, void *context) {
+  int red, green, blue;
+  Tuple *color_red_t, *color_green_t, *color_blue_t;
   // Background color?
-  Tuple *color_red_t = dict_find(iter, KEY_BGCOLOR_R);
-  Tuple *color_green_t = dict_find(iter, KEY_BGCOLOR_G);
-  Tuple *color_blue_t = dict_find(iter, KEY_BGCOLOR_B);
+  color_red_t = dict_find(iter, KEY_BGCOLOR_R);
+  color_green_t = dict_find(iter, KEY_BGCOLOR_G);
+  color_blue_t = dict_find(iter, KEY_BGCOLOR_B);
   if(color_red_t && color_green_t && color_blue_t) {
     // Apply the color if available
   #if PBL_SDK_3 
-      int red = color_red_t->value->int32;
-      int green = color_green_t->value->int32;
-      int blue = color_blue_t->value->int32;
+      red = color_red_t->value->int32;
+      green = color_green_t->value->int32;
+      blue = color_blue_t->value->int32;
   
       // Persist values
       persist_write_int(KEY_BGCOLOR_R, red);
@@ -44,9 +46,9 @@ static void inbox_received_callback(DictionaryIterator *iter, void *context) {
   if(color_red_t && color_green_t && color_blue_t) {
     // Apply the color if available
   #if PBL_SDK_3 
-      int red = color_red_t->value->int32;
-      int green = color_green_t->value->int32;
-      int blue = color_blue_t->value->int32;
+      red = color_red_t->value->int32;
+      green = color_green_t->value->int32;
+      blue = color_blue_t->value->int32;
   
       // Persist values
       persist_write_int(KEY_TIME_COLOR_R, red);
@@ -112,7 +114,7 @@ static void main_window_load(Window *window) {
   s_time_layer = text_layer_create(GRect(0, 51, 144, 100));
   s_date_layer = text_layer_create(GRect(0, 101, 144, 80));
   s_day_layer = text_layer_create(GRect(4, 3, 144, 80));
-  s_ampm_layer = text_layer_create(GRect(126, 85, 30, 30));
+  s_ampm_layer = text_layer_create(GRect(126, 86, 30, 30));
   text_layer_set_background_color(s_time_layer, GColorClear);
   text_layer_set_background_color(s_date_layer, GColorClear);
   text_layer_set_background_color(s_day_layer, GColorClear);
@@ -207,13 +209,6 @@ static void init() {
   
   // Create main Window element and assign to pointer
   s_main_window = window_create();
-  
-  // Set background color
-  #ifdef PBL_COLOR
-    window_set_background_color(s_main_window, GColorVividCerulean);
-  #else
-    window_set_background_color(s_main_window, GColorBlack);
-  #endif
   
   // Set handlers to manage the elements inside the Window
   window_set_window_handlers(s_main_window, (WindowHandlers) {

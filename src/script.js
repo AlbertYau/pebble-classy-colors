@@ -24,6 +24,8 @@ Pebble.addEventListener('webviewclosed', function(e) {
   dict.KEY_TIME_COLOR_R = parseInt(timeColor.substring(2, 4), 16);
   dict.KEY_TIME_COLOR_G = parseInt(timeColor.substring(4, 6), 16);
   dict.KEY_TIME_COLOR_B = parseInt(timeColor.substring(6), 16);
+  console.log(backgroundColor);
+  console.log(timeColor);
   // Send to watchapp
   Pebble.sendAppMessage(dict, function() {
     console.log('Send successful: ' + JSON.stringify(dict));
