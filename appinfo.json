@@ -1,0 +1,45 @@
+{
+    "appKeys": {
+        "KEY_BGCOLOR_B": 2,
+        "KEY_BGCOLOR_G": 1,
+        "KEY_BGCOLOR_R": 0
+    },
+    "capabilities": [
+        "location",
+        "configurable"
+    ],
+    "companyName": "Albert Yau",
+    "longName": "Classy Colors",
+    "projectType": "native",
+    "resources": {
+        "media": [
+            {
+                "file": "fonts/RobotoSlab-Bold.ttf",
+                "name": "FONT_AMPM_10",
+                "type": "font"
+            },
+            {
+                "file": "fonts/RobotoSlab-Bold.ttf",
+                "name": "FONT_DATE_20",
+                "type": "font"
+            },
+            {
+                "characterRegex": "[0-9:.]",
+                "file": "fonts/RobotoSlab-Bold.ttf",
+                "name": "FONT_TIME_46",
+                "trackingAdjust": -2,
+                "type": "font"
+            }
+        ]
+    },
+    "sdkVersion": "3",
+    "shortName": "Classy Colors",
+    "targetPlatforms": [
+        "basalt"
+    ],
+    "uuid": "967cb96c-682e-4e11-aacc-3aee6920f2aa",
+    "versionLabel": "1.0",
+    "watchapp": {
+        "watchface": true
+    }
+}
