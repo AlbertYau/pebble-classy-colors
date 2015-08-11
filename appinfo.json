@@ -2,7 +2,10 @@
     "appKeys": {
         "KEY_BGCOLOR_B": 2,
         "KEY_BGCOLOR_G": 1,
-        "KEY_BGCOLOR_R": 0
+        "KEY_BGCOLOR_R": 0,
+        "KEY_TIME_COLOR_B": 5,
+        "KEY_TIME_COLOR_G": 4,
+        "KEY_TIME_COLOR_R": 3
     },
     "capabilities": [
         "location",

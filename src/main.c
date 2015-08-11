@@ -12,9 +12,12 @@ static GFont s_ampm_font;
 #define KEY_BGCOLOR_R 0
 #define KEY_BGCOLOR_G 1
 #define KEY_BGCOLOR_B 2
+#define KEY_TIME_COLOR_R 3
+#define KEY_TIME_COLOR_G 4
+#define KEY_TIME_COLOR_B 5
 
 static void inbox_received_callback(DictionaryIterator *iter, void *context) {
-  // Color scheme?
+  // Background color?
   Tuple *color_red_t = dict_find(iter, KEY_BGCOLOR_R);
   Tuple *color_green_t = dict_find(iter, KEY_BGCOLOR_G);
   Tuple *color_blue_t = dict_find(iter, KEY_BGCOLOR_B);
@@ -32,6 +35,26 @@ static void inbox_received_callback(DictionaryIterator *iter, void *context) {
   
       GColor bg_color = GColorFromRGB(red, green, blue);
       window_set_background_color(s_main_window, bg_color);
+  #endif
+  }
+  // Time color?
+  color_red_t = dict_find(iter, KEY_TIME_COLOR_R);
+  color_green_t = dict_find(iter, KEY_TIME_COLOR_G);
+  color_blue_t = dict_find(iter, KEY_TIME_COLOR_B);
+  if(color_red_t && color_green_t && color_blue_t) {
+    // Apply the color if available
+  #if PBL_SDK_3 
+      int red = color_red_t->value->int32;
+      int green = color_green_t->value->int32;
+      int blue = color_blue_t->value->int32;
+  
+      // Persist values
+      persist_write_int(KEY_TIME_COLOR_R, red);
+      persist_write_int(KEY_TIME_COLOR_G, green);
+      persist_write_int(KEY_TIME_COLOR_B, blue);
+  
+      GColor time_color = GColorFromRGB(red, green, blue);
+      text_layer_set_text_color(s_time_layer, time_color); 
   #endif
   }
 }
@@ -96,19 +119,28 @@ static void main_window_load(Window *window) {
   text_layer_set_background_color(s_ampm_layer, GColorClear);
  
   #ifdef PBL_COLOR
+    int red, green, blue;
     if (persist_exists(KEY_BGCOLOR_R)) {
       // Use background color setting
-      int red = persist_read_int(KEY_BGCOLOR_R);
-      int green = persist_read_int(KEY_BGCOLOR_G);
-      int blue = persist_read_int(KEY_BGCOLOR_B);
-  
+      red = persist_read_int(KEY_BGCOLOR_R);
+      green = persist_read_int(KEY_BGCOLOR_G);
+      blue = persist_read_int(KEY_BGCOLOR_B);
       GColor bg_color = GColorFromRGB(red, green, blue);
       window_set_background_color(s_main_window, bg_color); 
     } 
     else {
       window_set_background_color(s_main_window, GColorVividCerulean); 
     }
-    text_layer_set_text_color(s_time_layer, GColorRed);  
+    if (persist_exists(KEY_TIME_COLOR_R)) {
+      red = persist_read_int(KEY_TIME_COLOR_R);
+      green = persist_read_int(KEY_TIME_COLOR_G);
+      blue = persist_read_int(KEY_TIME_COLOR_B);  
+      GColor time_color = GColorFromRGB(red, green, blue);
+      text_layer_set_text_color(s_time_layer, time_color);  
+    } 
+    else {
+      text_layer_set_text_color(s_time_layer, GColorFolly);  
+    }
   #endif
   
   text_layer_set_text_color(s_date_layer, GColorWhite);
