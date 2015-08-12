@@ -5,9 +5,12 @@ static TextLayer *s_time_layer;
 static TextLayer *s_date_layer;
 static TextLayer *s_day_layer;
 static TextLayer *s_ampm_layer;
+static Layer *bluetooth_icon_layer;
 static GFont s_time_font;
 static GFont s_date_font;
 static GFont s_ampm_font;
+static bool bluetoothConnected;
+static bool bluetoothIconEnabled;
 
 #define KEY_BGCOLOR_R 0
 #define KEY_BGCOLOR_G 1
@@ -15,8 +18,10 @@ static GFont s_ampm_font;
 #define KEY_TIME_COLOR_R 3
 #define KEY_TIME_COLOR_G 4
 #define KEY_TIME_COLOR_B 5
+#define KEY_BLUETOOTH_ICON_ENABLED 6
 
 static void inbox_received_callback(DictionaryIterator *iter, void *context) {
+  #if PBL_SDK_3 
   int red, green, blue;
   Tuple *color_red_t, *color_green_t, *color_blue_t;
   // Background color?
@@ -25,7 +30,6 @@ static void inbox_received_callback(DictionaryIterator *iter, void *context) {
   color_blue_t = dict_find(iter, KEY_BGCOLOR_B);
   if(color_red_t && color_green_t && color_blue_t) {
     // Apply the color if available
-  #if PBL_SDK_3 
       red = color_red_t->value->int32;
       green = color_green_t->value->int32;
       blue = color_blue_t->value->int32;
@@ -37,7 +41,6 @@ static void inbox_received_callback(DictionaryIterator *iter, void *context) {
   
       GColor bg_color = GColorFromRGB(red, green, blue);
       window_set_background_color(s_main_window, bg_color);
-  #endif
   }
   // Time color?
   color_red_t = dict_find(iter, KEY_TIME_COLOR_R);
@@ -45,7 +48,6 @@ static void inbox_received_callback(DictionaryIterator *iter, void *context) {
   color_blue_t = dict_find(iter, KEY_TIME_COLOR_B);
   if(color_red_t && color_green_t && color_blue_t) {
     // Apply the color if available
-  #if PBL_SDK_3 
       red = color_red_t->value->int32;
       green = color_green_t->value->int32;
       blue = color_blue_t->value->int32;
@@ -57,8 +59,8 @@ static void inbox_received_callback(DictionaryIterator *iter, void *context) {
   
       GColor time_color = GColorFromRGB(red, green, blue);
       text_layer_set_text_color(s_time_layer, time_color); 
-  #endif
   }
+  #endif
 }
 
 static void inbox_dropped_callback(AppMessageResult reason, void *context) {
@@ -71,6 +73,33 @@ static void outbox_failed_callback(DictionaryIterator *iterator, AppMessageResul
 
 static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
   APP_LOG(APP_LOG_LEVEL_INFO, "Outbox send success!");
+}
+
+static void bt_handler(bool connected) {
+  // Vibrate on disconnect
+  if (bluetoothConnected == true && connected == false) {
+    vibes_short_pulse();
+  }
+  if (bluetoothIconEnabled) {
+    layer_set_hidden(bluetooth_icon_layer, !connected);
+  } else {
+    layer_set_hidden(bluetooth_icon_layer, true);
+  }
+  bluetoothConnected = connected;
+}
+
+static void bluetooth_update_proc(Layer *this_layer, GContext *ctx) {
+  // Draw things here using ctx
+  graphics_context_set_stroke_color(ctx, GColorWhite);
+  graphics_context_set_stroke_width(ctx, 1);
+  // X
+  graphics_draw_line(ctx, GPoint(0, 10), GPoint(10, 20));
+  graphics_draw_line(ctx, GPoint(0, 20), GPoint(10, 10));
+  // |
+  graphics_draw_line(ctx, GPoint(5, 5), GPoint(5, 25));
+  // \ + /
+  graphics_draw_line(ctx, GPoint(5, 5), GPoint(10, 10));
+  graphics_draw_line(ctx, GPoint(5, 25), GPoint(10, 20));
 }
 
 static void update_time() {
@@ -114,16 +143,20 @@ static void main_window_load(Window *window) {
   s_time_layer = text_layer_create(GRect(0, 51, 144, 100));
   s_date_layer = text_layer_create(GRect(0, 101, 144, 80));
   s_day_layer = text_layer_create(GRect(4, 3, 144, 80));
-  s_ampm_layer = text_layer_create(GRect(126, 86, 30, 30));
+  s_ampm_layer = text_layer_create(GRect(126, 85, 30, 30));
   text_layer_set_background_color(s_time_layer, GColorClear);
   text_layer_set_background_color(s_date_layer, GColorClear);
   text_layer_set_background_color(s_day_layer, GColorClear);
   text_layer_set_background_color(s_ampm_layer, GColorClear);
+  
+  // Create bluetooth icon layer and register it
+  bluetooth_icon_layer = layer_create(GRect(6, 137, 144, 168));
+  layer_set_update_proc(bluetooth_icon_layer, bluetooth_update_proc);
  
+  // Get stored colors
   #ifdef PBL_COLOR
     int red, green, blue;
     if (persist_exists(KEY_BGCOLOR_R)) {
-      // Use background color setting
       red = persist_read_int(KEY_BGCOLOR_R);
       green = persist_read_int(KEY_BGCOLOR_G);
       blue = persist_read_int(KEY_BGCOLOR_B);
@@ -144,28 +177,35 @@ static void main_window_load(Window *window) {
       text_layer_set_text_color(s_time_layer, GColorFolly);  
     }
   #endif
-  
+  if (persist_exists(KEY_BLUETOOTH_ICON_ENABLED)) {
+    int enabled = persist_read_int(KEY_BLUETOOTH_ICON_ENABLED);
+    bluetoothIconEnabled = enabled != 0;
+  }
+  else {
+    bluetoothIconEnabled = true;
+  }
+  // Set secondary colors
   text_layer_set_text_color(s_date_layer, GColorWhite);
   text_layer_set_text_color(s_day_layer, GColorWhite);
   text_layer_set_text_color(s_ampm_layer, GColorWhite);
-  //text_layer_set_font(s_time_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_BOLD));
-  //text_layer_set_font(s_date_layer, fonts_get_system_font(FONT_KEY_ROBOTO_CONDENSED_21));
-  //text_layer_set_font(s_day_layer, fonts_get_system_font(FONT_KEY_ROBOTO_CONDENSED_21));
-  //text_layer_set_font(s_ampm_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD));
   
   // Improve the layout to be more like a watchface
   text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter);
   text_layer_set_text_alignment(s_date_layer, GTextAlignmentCenter);
   text_layer_set_text_alignment(s_day_layer, GTextAlignmentLeft);
 
-  // Add it as a child layer to the Window's root layer
+  // Add child layers to the Window's root layer
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_time_layer));
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_date_layer));
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_day_layer));
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_ampm_layer));
-    
+  layer_add_child(window_get_root_layer(window), bluetooth_icon_layer);
+  
   // Make sure the time is displayed from the start
   update_time();
+  
+  // Show current connection state
+  bt_handler(bluetooth_connection_service_peek());
   
   // Create GFont
   s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_TIME_46));
@@ -177,7 +217,6 @@ static void main_window_load(Window *window) {
   text_layer_set_font(s_date_layer, s_date_font);
   text_layer_set_font(s_day_layer, s_date_font);
   text_layer_set_font(s_ampm_layer, s_ampm_font);
-  
 }
 
 static void main_window_unload(Window *window) {
@@ -190,6 +229,8 @@ static void main_window_unload(Window *window) {
   fonts_unload_custom_font(s_time_font);
   fonts_unload_custom_font(s_date_font);
   fonts_unload_custom_font(s_ampm_font);
+  
+  layer_destroy(bluetooth_icon_layer);
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
@@ -219,8 +260,11 @@ static void init() {
   // Show the Window on the watch, with animated=true
   window_stack_push(s_main_window, true);
   
-  // Register with TickTimerService
+  // Subscribe to TickTimerService
   tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
+  
+  // Subscribe to Bluetooth service
+  bluetooth_connection_service_subscribe(bt_handler);
 }
 
 static void deinit() {

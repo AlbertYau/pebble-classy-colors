@@ -3,6 +3,7 @@
         "KEY_BGCOLOR_B": 2,
         "KEY_BGCOLOR_G": 1,
         "KEY_BGCOLOR_R": 0,
+        "KEY_BLUETOOTH_ICON_ENABLED": 6,
         "KEY_TIME_COLOR_B": 5,
         "KEY_TIME_COLOR_G": 4,
         "KEY_TIME_COLOR_R": 3
@@ -17,8 +18,10 @@
     "resources": {
         "media": [
             {
+                "characterRegex": "[0-9:.]",
                 "file": "fonts/RobotoSlab-Bold.ttf",
-                "name": "FONT_AMPM_10",
+                "name": "FONT_TIME_46",
+                "trackingAdjust": -2,
                 "type": "font"
             },
             {
@@ -27,10 +30,8 @@
                 "type": "font"
             },
             {
-                "characterRegex": "[0-9:.]",
                 "file": "fonts/RobotoSlab-Bold.ttf",
-                "name": "FONT_TIME_46",
-                "trackingAdjust": -2,
+                "name": "FONT_AMPM_10",
                 "type": "font"
             }
         ]
