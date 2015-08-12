@@ -20,6 +20,14 @@ static bool bluetoothIconEnabled;
 #define KEY_TIME_COLOR_B 5
 #define KEY_BLUETOOTH_ICON_ENABLED 6
 
+static void bt_update() {
+  if (bluetoothIconEnabled) {
+    layer_set_hidden(bluetooth_icon_layer, !bluetoothConnected);
+  } else {
+    layer_set_hidden(bluetooth_icon_layer, true);
+  }
+}
+  
 static void inbox_received_callback(DictionaryIterator *iter, void *context) {
   #if PBL_SDK_3 
   int red, green, blue;
@@ -61,6 +69,15 @@ static void inbox_received_callback(DictionaryIterator *iter, void *context) {
       text_layer_set_text_color(s_time_layer, time_color); 
   }
   #endif
+  // Get bluetooth enabled
+  Tuple *bluetooth_icon_enabled_t;
+  bluetooth_icon_enabled_t = dict_find(iter, KEY_BLUETOOTH_ICON_ENABLED);
+  if (bluetooth_icon_enabled_t) {
+    int enabled = bluetooth_icon_enabled_t->value->uint8;
+    bluetoothIconEnabled = enabled != 0;
+    bt_update();
+    persist_write_int(KEY_BLUETOOTH_ICON_ENABLED, enabled);
+  }
 }
 
 static void inbox_dropped_callback(AppMessageResult reason, void *context) {
@@ -80,15 +97,11 @@ static void bt_handler(bool connected) {
   if (bluetoothConnected == true && connected == false) {
     vibes_short_pulse();
   }
-  if (bluetoothIconEnabled) {
-    layer_set_hidden(bluetooth_icon_layer, !connected);
-  } else {
-    layer_set_hidden(bluetooth_icon_layer, true);
-  }
   bluetoothConnected = connected;
+  bt_update();
 }
 
-static void bluetooth_update_proc(Layer *this_layer, GContext *ctx) {
+static void bluetooth_icon_update_proc(Layer *this_layer, GContext *ctx) {
   // Draw things here using ctx
   graphics_context_set_stroke_color(ctx, GColorWhite);
   graphics_context_set_stroke_width(ctx, 1);
@@ -151,7 +164,7 @@ static void main_window_load(Window *window) {
   
   // Create bluetooth icon layer and register it
   bluetooth_icon_layer = layer_create(GRect(6, 137, 144, 168));
-  layer_set_update_proc(bluetooth_icon_layer, bluetooth_update_proc);
+  layer_set_update_proc(bluetooth_icon_layer, bluetooth_icon_update_proc);
  
   // Get stored colors
   #ifdef PBL_COLOR

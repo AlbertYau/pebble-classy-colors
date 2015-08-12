@@ -18,14 +18,14 @@ Pebble.addEventListener('webviewclosed', function(e) {
   dict = {};
   var backgroundColor = configData.bgColor;
   var timeColor = configData.timeColor;
+  var bluetoothIconEnabled = configData.bluetoothIconEnabled;
   dict.KEY_BGCOLOR_R = parseInt(backgroundColor.substring(2, 4), 16);
   dict.KEY_BGCOLOR_G = parseInt(backgroundColor.substring(4, 6), 16);
   dict.KEY_BGCOLOR_B = parseInt(backgroundColor.substring(6), 16);
   dict.KEY_TIME_COLOR_R = parseInt(timeColor.substring(2, 4), 16);
   dict.KEY_TIME_COLOR_G = parseInt(timeColor.substring(4, 6), 16);
   dict.KEY_TIME_COLOR_B = parseInt(timeColor.substring(6), 16);
-  console.log(backgroundColor);
-  console.log(timeColor);
+  dict.KEY_BLUETOOTH_ICON_ENABLED = bluetoothIconEnabled;
   // Send to watchapp
   Pebble.sendAppMessage(dict, function() {
     console.log('Send successful: ' + JSON.stringify(dict));
