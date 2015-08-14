@@ -21,6 +21,12 @@
     "resources": {
         "media": [
             {
+                "file": "images/menu.png",
+                "menuIcon": true,
+                "name": "MENU_IMAGE",
+                "type": "png"
+            },
+            {
                 "characterRegex": "[0-9:.]",
                 "file": "fonts/RobotoSlab-Bold.ttf",
                 "name": "FONT_TIME_46",
