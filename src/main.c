@@ -11,6 +11,7 @@ static GFont s_date_font;
 static GFont s_ampm_font;
 static bool bluetoothConnected;
 static bool bluetoothIconEnabled;
+static GColor secondary_color;
 
 #define KEY_BGCOLOR_R 0
 #define KEY_BGCOLOR_G 1
@@ -19,6 +20,9 @@ static bool bluetoothIconEnabled;
 #define KEY_TIME_COLOR_G 4
 #define KEY_TIME_COLOR_B 5
 #define KEY_BLUETOOTH_ICON_ENABLED 6
+#define KEY_SECONDARY_COLOR_R 7
+#define KEY_SECONDARY_COLOR_G 8
+#define KEY_SECONDARY_COLOR_B 9
 
 static void bt_update() {
   if (bluetoothIconEnabled) {
@@ -68,6 +72,26 @@ static void inbox_received_callback(DictionaryIterator *iter, void *context) {
       GColor time_color = GColorFromRGB(red, green, blue);
       text_layer_set_text_color(s_time_layer, time_color); 
   }
+  // Secondary color?
+  color_red_t = dict_find(iter, KEY_SECONDARY_COLOR_R);
+  color_green_t = dict_find(iter, KEY_SECONDARY_COLOR_G);
+  color_blue_t = dict_find(iter, KEY_SECONDARY_COLOR_B);
+  if(color_red_t && color_green_t && color_blue_t) {
+    // Apply the color if available
+      red = color_red_t->value->int32;
+      green = color_green_t->value->int32;
+      blue = color_blue_t->value->int32;
+  
+      // Persist values
+      persist_write_int(KEY_SECONDARY_COLOR_R, red);
+      persist_write_int(KEY_SECONDARY_COLOR_G, green);
+      persist_write_int(KEY_SECONDARY_COLOR_B, blue);
+  
+      secondary_color = GColorFromRGB(red, green, blue);
+      text_layer_set_text_color(s_date_layer, secondary_color); 
+      text_layer_set_text_color(s_day_layer, secondary_color); 
+      text_layer_set_text_color(s_ampm_layer, secondary_color);
+  }
   #endif
   // Get bluetooth enabled
   Tuple *bluetooth_icon_enabled_t;
@@ -103,16 +127,21 @@ static void bt_handler(bool connected) {
 
 static void bluetooth_icon_update_proc(Layer *this_layer, GContext *ctx) {
   // Draw things here using ctx
-  graphics_context_set_stroke_color(ctx, GColorWhite);
+  if (persist_exists(KEY_SECONDARY_COLOR_R)) {
+    graphics_context_set_stroke_color(ctx, secondary_color);
+  }
+  else {
+    graphics_context_set_stroke_color(ctx, GColorWhite);
+  }
   graphics_context_set_stroke_width(ctx, 1);
   // X
-  graphics_draw_line(ctx, GPoint(0, 10), GPoint(10, 20));
-  graphics_draw_line(ctx, GPoint(0, 20), GPoint(10, 10));
+  graphics_draw_line(ctx, GPoint(0, 8), GPoint(8, 16));
+  graphics_draw_line(ctx, GPoint(0, 16), GPoint(8, 8));
   // |
-  graphics_draw_line(ctx, GPoint(5, 5), GPoint(5, 25));
+  graphics_draw_line(ctx, GPoint(4, 4), GPoint(4, 20));
   // \ + /
-  graphics_draw_line(ctx, GPoint(5, 5), GPoint(10, 10));
-  graphics_draw_line(ctx, GPoint(5, 25), GPoint(10, 20));
+  graphics_draw_line(ctx, GPoint(4, 4), GPoint(8, 8));
+  graphics_draw_line(ctx, GPoint(4, 20), GPoint(8, 16));
 }
 
 static void update_time() {
@@ -156,16 +185,12 @@ static void main_window_load(Window *window) {
   s_time_layer = text_layer_create(GRect(0, 51, 144, 100));
   s_date_layer = text_layer_create(GRect(0, 101, 144, 80));
   s_day_layer = text_layer_create(GRect(4, 3, 144, 80));
-  s_ampm_layer = text_layer_create(GRect(126, 85, 30, 30));
+  s_ampm_layer = text_layer_create(GRect(127, 85, 30, 30));
   text_layer_set_background_color(s_time_layer, GColorClear);
   text_layer_set_background_color(s_date_layer, GColorClear);
   text_layer_set_background_color(s_day_layer, GColorClear);
   text_layer_set_background_color(s_ampm_layer, GColorClear);
   
-  // Create bluetooth icon layer and register it
-  bluetooth_icon_layer = layer_create(GRect(6, 137, 144, 168));
-  layer_set_update_proc(bluetooth_icon_layer, bluetooth_icon_update_proc);
- 
   // Get stored colors
   #ifdef PBL_COLOR
     int red, green, blue;
@@ -189,7 +214,24 @@ static void main_window_load(Window *window) {
     else {
       text_layer_set_text_color(s_time_layer, GColorFolly);  
     }
+  if (persist_exists(KEY_SECONDARY_COLOR_R)) {
+      red = persist_read_int(KEY_SECONDARY_COLOR_R);
+      green = persist_read_int(KEY_SECONDARY_COLOR_G);
+      blue = persist_read_int(KEY_SECONDARY_COLOR_B);     
+      secondary_color = GColorFromRGB(red, green, blue);
+      text_layer_set_text_color(s_date_layer, secondary_color); 
+      text_layer_set_text_color(s_day_layer, secondary_color); 
+      text_layer_set_text_color(s_ampm_layer, secondary_color);
+    } 
+    else {
+        // Set secondary colors
+        text_layer_set_text_color(s_date_layer, GColorWhite);
+        text_layer_set_text_color(s_day_layer, GColorWhite);
+        text_layer_set_text_color(s_ampm_layer, GColorWhite);
+    }
   #endif
+    
+  // Get stored BT var
   if (persist_exists(KEY_BLUETOOTH_ICON_ENABLED)) {
     int enabled = persist_read_int(KEY_BLUETOOTH_ICON_ENABLED);
     bluetoothIconEnabled = enabled != 0;
@@ -197,10 +239,10 @@ static void main_window_load(Window *window) {
   else {
     bluetoothIconEnabled = true;
   }
-  // Set secondary colors
-  text_layer_set_text_color(s_date_layer, GColorWhite);
-  text_layer_set_text_color(s_day_layer, GColorWhite);
-  text_layer_set_text_color(s_ampm_layer, GColorWhite);
+    
+  // Create bluetooth icon layer and register it
+  bluetooth_icon_layer = layer_create(GRect(129, 141, 144, 168));
+  layer_set_update_proc(bluetooth_icon_layer, bluetooth_icon_update_proc);
   
   // Improve the layout to be more like a watchface
   text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter);
