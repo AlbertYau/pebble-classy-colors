@@ -202,7 +202,7 @@ static void main_window_load(Window *window) {
       window_set_background_color(s_main_window, bg_color); 
     } 
     else {
-      window_set_background_color(s_main_window, GColorCobaltBlue); 
+      window_set_background_color(s_main_window, GColorBlueMoon); 
     }
     if (persist_exists(KEY_TIME_COLOR_R)) {
       red = persist_read_int(KEY_TIME_COLOR_R);
