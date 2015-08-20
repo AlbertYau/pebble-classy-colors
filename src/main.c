@@ -131,7 +131,7 @@ static void bluetooth_icon_update_proc(Layer *this_layer, GContext *ctx) {
     graphics_context_set_stroke_color(ctx, secondary_color);
   }
   else {
-    graphics_context_set_stroke_color(ctx, GColorWhite);
+    graphics_context_set_stroke_color(ctx, GColorVividCerulean);
   }
   graphics_context_set_stroke_width(ctx, 1);
   // X
@@ -202,7 +202,7 @@ static void main_window_load(Window *window) {
       window_set_background_color(s_main_window, bg_color); 
     } 
     else {
-      window_set_background_color(s_main_window, GColorBlueMoon); 
+      window_set_background_color(s_main_window, GColorBlack); 
     }
     if (persist_exists(KEY_TIME_COLOR_R)) {
       red = persist_read_int(KEY_TIME_COLOR_R);
@@ -212,7 +212,7 @@ static void main_window_load(Window *window) {
       text_layer_set_text_color(s_time_layer, time_color);  
     } 
     else {
-      text_layer_set_text_color(s_time_layer, GColorBlack);  
+      text_layer_set_text_color(s_time_layer, GColorWhite);  
     }
   if (persist_exists(KEY_SECONDARY_COLOR_R)) {
       red = persist_read_int(KEY_SECONDARY_COLOR_R);
@@ -225,9 +225,9 @@ static void main_window_load(Window *window) {
     } 
     else {
         // Set secondary colors
-        text_layer_set_text_color(s_date_layer, GColorWhite);
-        text_layer_set_text_color(s_day_layer, GColorWhite);
-        text_layer_set_text_color(s_ampm_layer, GColorWhite);
+        text_layer_set_text_color(s_date_layer, GColorVividCerulean);
+        text_layer_set_text_color(s_day_layer, GColorVividCerulean);
+        text_layer_set_text_color(s_ampm_layer, GColorVividCerulean);
     }
   #endif
     
