@@ -202,7 +202,7 @@ static void main_window_load(Window *window) {
       window_set_background_color(s_main_window, bg_color); 
     } 
     else {
-      window_set_background_color(s_main_window, GColorVividCerulean); 
+      window_set_background_color(s_main_window, GColorCobaltBlue); 
     }
     if (persist_exists(KEY_TIME_COLOR_R)) {
       red = persist_read_int(KEY_TIME_COLOR_R);
@@ -212,7 +212,7 @@ static void main_window_load(Window *window) {
       text_layer_set_text_color(s_time_layer, time_color);  
     } 
     else {
-      text_layer_set_text_color(s_time_layer, GColorFolly);  
+      text_layer_set_text_color(s_time_layer, GColorBlack);  
     }
   if (persist_exists(KEY_SECONDARY_COLOR_R)) {
       red = persist_read_int(KEY_SECONDARY_COLOR_R);
